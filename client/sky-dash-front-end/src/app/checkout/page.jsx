@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
@@ -24,9 +23,12 @@ export default function ShoppingCart() {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data.status === 1) {
-          // Set orders as returned from API.
-          setOrders(res.data.data);
-          setFilteredOrders(res.data.data);
+          // Only show orders where at least one order item has paymentStatus "2"
+          const paidOrders = res.data.data.filter((order) =>
+            order.orderItems.some((item) => item.paymentStatus === "2")
+          );
+          setOrders(paidOrders);
+          setFilteredOrders(paidOrders);
         } else {
           toast.error("Failed to fetch orders");
         }
@@ -53,7 +55,7 @@ export default function ShoppingCart() {
     router.push(`/course-details/${courseId}`);
   };
 
-  // Calculate total price only from order items with pending payment (paymentStatus !== "2")
+  // Calculate total price from all order items across orders.
   const totalPrice =
     orders.reduce((acc, order) => {
       const orderTotal = order.orderItems
@@ -160,14 +162,14 @@ export default function ShoppingCart() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black p-8">
+    <div className="min-h-screen bg-white text-black p-4 md:p-8">
       <ToastContainer />
-      <h1 className="text-4xl font-bold mb-6">Your Orders</h1>
+      <h1 className="text-3xl md:text-4xl font-bold mb-6">Your Orders</h1>
 
       {/* Sorting & Filtering */}
-      <div className="flex justify-between mt-6 mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
         <select
-          className="bg-white text-black border border-black px-4 py-2"
+          className="bg-white text-black border border-black px-4 py-2 rounded-md"
           onChange={(e) => setSortBy(e.target.value)}
         >
           <option>Recently Accessed</option>
@@ -178,60 +180,66 @@ export default function ShoppingCart() {
           placeholder="Search my courses"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="bg-white text-black border border-black px-4 py-2"
+          className="bg-white text-black border border-black px-4 py-2 rounded-md w-full sm:w-auto"
         />
       </div>
 
       {/* Orders List */}
-      {filteredOrders.map((order) => (
-        <div key={order._id} className="border p-4 mb-6">
-          <div className="flex justify-between items-center">
-            <p className="text-sm text-gray-600">
-              Order Date: {new Date(order.orderDate).toLocaleDateString()}
-            </p>
-            <button
-              onClick={() => removeOrder(order._id)}
-              className="text-red-500 text-sm"
-            >
-              Remove Order
-            </button>
-          </div>
-          {/* List each order item, but filter out items with paymentStatus "2" */}
-          {order.orderItems
-            .filter((item) => item.paymentStatus !== "2")
-            .map((item, idx) => {
-              const course = item.courseId;
-              const image =
-                course && course.courseImage
-                  ? `http://localhost:8080/uploads/course/${course.courseImage}`
-                  : "http://localhost:8080/uploads/course/default.png";
-              return (
-                <div
-                  key={idx}
-                  onClick={() =>
-                    handleCourseCard(course ? course._id : item.courseId)
-                  }
-                  className="border-b py-4 flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
-                >
-                  <div className="flex items-center space-x-4">
-                    {/* Course Image */}
-                    <div className="relative w-16 h-16 border rounded overflow-hidden">
-                      <img
-                        src={image}
-                        alt={item.courseName}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h2 className="text-lg font-semibold">{item.courseName}</h2>
-                      <p className="text-sm text-gray-600">Price: ₹{item.coursePrice}</p>
+      <div className="grid grid-cols-1 gap-6 text-black">
+        {filteredOrders.map((order) => (
+          <div key={order._id} className="border p-4 mb-6">
+            <div className="flex justify-between items-center">
+              <p className="text-sm text-gray-600">
+                Order Date: {new Date(order.orderDate).toLocaleDateString()}
+              </p>
+              <button
+                onClick={() => removeOrder(order._id)}
+                className="text-red-500 text-sm"
+              >
+                Remove Order
+              </button>
+            </div>
+            {/* List each order item, but filter out items with paymentStatus "2" */}
+            {order.orderItems
+              .filter((item) => item.paymentStatus !== "2")
+              .map((item, idx) => {
+                const course = item.courseId;
+                const image =
+                  course && course.courseImage
+                    ? `http://localhost:8080/uploads/course/${course.courseImage}`
+                    : "http://localhost:8080/uploads/course/default.png";
+                return (
+                  <div
+                    key={idx}
+                    onClick={() =>
+                      handleCourseCard(course ? course._id : item.courseId)
+                    }
+                    className="border-b py-4 flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
+                  >
+                    <div className="flex items-center space-x-4">
+                      {/* Course Image */}
+                      <div className="relative w-16 h-16 border rounded overflow-hidden">
+                        <img
+                          src={image}
+                          alt={item.courseName}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold">
+                          {item.courseName}
+                        </h2>
+                        <p className="text-sm text-gray-600">
+                          Price: ₹{item.coursePrice}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-        </div>
-      ))}
+                );
+              })}
+          </div>
+        ))}
+      </div>
 
       {/* Total Price & Payment Button */}
       <div className="mt-6 p-4 border rounded-lg">
@@ -254,7 +262,7 @@ export default function ShoppingCart() {
             placeholder="Enter Coupon"
             value={coupon}
             onChange={(e) => setCoupon(e.target.value)}
-            className="border px-4 py-2 w-full"
+            className="border px-4 py-2 w-full rounded-l-lg"
           />
           <button
             onClick={() => {
@@ -264,7 +272,7 @@ export default function ShoppingCart() {
                 alert("Invalid Coupon Code!");
               }
             }}
-            className="bg-purple-600 text-white px-4"
+            className="bg-purple-600 text-white px-4 rounded-r-lg"
           >
             Apply
           </button>

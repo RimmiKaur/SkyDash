@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { FaChevronDown, FaChevronUp, FaFilter } from "react-icons/fa";
 
 export default function CourseFilter({
@@ -10,7 +10,7 @@ export default function CourseFilter({
   selectedDuration,
   setSelectedDuration,
 }) {
-  const [openSections, setOpenSections] = React.useState({
+  const [openSections, setOpenSections] = useState({
     duration: true,
     language: true,
     price: true,
@@ -24,14 +24,14 @@ export default function CourseFilter({
   };
 
   return (
-    <div className="w-72 ml-10 bg-white text-black p-4 shadow-md border border-gray-200 mt-[-80px]">
+    <div className="w-full md:w-72 mx-auto bg-white text-black p-4 shadow-md border border-gray-200 mt-4">
       {/* Filter Header */}
-      <div className="flex justify-between items-center mb-4">
-        <button className="flex items-center space-x-2 text-lg font-semibold">
+      <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
+        <button className="flex items-center space-x-2 text-lg font-semibold mb-2 sm:mb-0">
           <FaFilter />
           <span>Filter</span>
         </button>
-        <select className="border p-2 rounded-md text-sm">
+        <select className="border p-2 rounded-md text-sm w-full sm:w-auto">
           <option>Most Popular</option>
           <option>Newest</option>
           <option>Highest Rated</option>
@@ -44,7 +44,8 @@ export default function CourseFilter({
           className="flex justify-between w-full text-lg font-semibold mb-2"
           onClick={() => toggleSection("duration")}
         >
-          Video Duration {openSections.duration ? <FaChevronUp /> : <FaChevronDown />}
+          Video Duration{" "}
+          {openSections.duration ? <FaChevronUp /> : <FaChevronDown />}
         </button>
         {openSections.duration && (
           <div className="space-y-2">
@@ -63,13 +64,14 @@ export default function CourseFilter({
         )}
       </div>
 
-      {/* Language Filter with Radio Buttons */}
+      {/* Language Filter */}
       <div className="mt-4">
         <button
           className="flex justify-between w-full text-lg font-semibold mb-2"
           onClick={() => toggleSection("language")}
         >
-          Language {openSections.language ? <FaChevronUp /> : <FaChevronDown />}
+          Language{" "}
+          {openSections.language ? <FaChevronUp /> : <FaChevronDown />}
         </button>
         {openSections.language && (
           <div className="mt-2 space-y-2">
@@ -89,13 +91,14 @@ export default function CourseFilter({
         )}
       </div>
 
-      {/* Price Filter with Slider */}
+      {/* Price Filter */}
       <div className="mt-4">
         <button
           className="flex justify-between w-full text-lg font-semibold mb-2"
           onClick={() => toggleSection("price")}
         >
-          Price {openSections.price ? <FaChevronUp /> : <FaChevronDown />}
+          Price{" "}
+          {openSections.price ? <FaChevronUp /> : <FaChevronDown />}
         </button>
         {openSections.price && (
           <div className="mt-2">

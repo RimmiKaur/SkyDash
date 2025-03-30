@@ -17,10 +17,10 @@ export default function CourseDetails() {
   const [activeTab, setActiveTab] = useState("about");
   const [openSection, setOpenSection] = useState(null);
   const [currentVideo, setCurrentVideo] = useState("");
-
-  // Base URL from env
+  
+  // Base URL from env variables
   const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080/";
-
+  
   // Fetch course details (including sections & videos)
   useEffect(() => {
     if (id) {
@@ -50,7 +50,7 @@ export default function CourseDetails() {
         });
     }
   }, [id, baseURL]);
-
+  
   // Fetch instructor details
   useEffect(() => {
     if (id) {
@@ -69,16 +69,16 @@ export default function CourseDetails() {
         });
     }
   }, [id, baseURL]);
-
+  
   const toggleSection = (index) => {
     setOpenSection(openSection === index ? null : index);
   };
-
+  
   // Helper: Convert a YouTube link to its embed version
   const getEmbedUrl = (url) => {
     return url.includes("watch?v=") ? url.replace("watch?v=", "embed/") : url;
   };
-
+  
   // Handle "Add to Cart" - create/update order
   const handleAddToCart = async () => {
     const userData = Cookies.get("user");
@@ -110,22 +110,26 @@ export default function CourseDetails() {
       toast.error("Error adding order to cart.");
     }
   };
-
+  
   if (!course) {
     return <p className="text-center text-gray-600">Loading course...</p>;
   }
-
+  
   // Build image URL using staticPath from API or default "uploads/course"
   const staticPath = course.staticPath || "uploads/course";
   const imageURL = `${baseURL}${staticPath}/${course.courseImage}`;
-
+  
   return (
-    <div className="min-h-screen bg-white  mx-auto p-6 mt-16 text-black">
+    <div className=" mx-auto px-4 sm:px-6 lg:px-8 bg-white min-h-screen mt-16 text-black">
       <ToastContainer />
       {/* Course Title & Category */}
-      <h1 className="text-3xl font-bold mb-2 text-center md:text-left">{course.courseName}</h1>
-      <p className="text-gray-500 mb-4 text-center md:text-left">{course.courseCategory}</p>
-
+      <h1 className="text-3xl sm:text-4xl font-bold mb-2 text-center sm:text-left">
+        {course.courseName}
+      </h1>
+      <p className="text-gray-500 mb-4 text-center sm:text-left">
+        {course.courseCategory}
+      </p>
+  
       {/* Course Image */}
       <div className="relative w-full h-56 mb-6">
         <img
@@ -134,16 +138,16 @@ export default function CourseDetails() {
           className="w-full h-full object-cover object-center rounded"
         />
       </div>
-
+  
       {/* Price & Add to Cart */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
         <p className="text-lg font-semibold text-green-600">
           Price: ${course.coursePrice}
         </p>
         <button
           onClick={handleAddToCart}
           disabled={course.coursePrice === 0}
-          className={`mt-4 md:mt-0 px-6 py-3 font-semibold text-white transition ${
+          className={`mt-4 sm:mt-0 px-6 py-3 font-semibold text-white transition ${
             course.coursePrice === 0
               ? "bg-gray-400 cursor-not-allowed"
               : "bg-green-500 hover:bg-green-600"
@@ -152,14 +156,14 @@ export default function CourseDetails() {
           {course.coursePrice === 0 ? "Already Free" : "Add to Cart"}
         </button>
       </div>
-
+  
       {/* Tab Navigation */}
       <div className="border-b mb-6">
         {["about", "outcomes", "courses", "instructor"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`py-2 px-4 text-sm md:text-base ${
+            className={`py-2 px-4 text-sm sm:text-base ${
               activeTab === tab
                 ? "border-b-2 border-green-600 text-green-600 font-semibold"
                 : "text-gray-600"
@@ -169,24 +173,24 @@ export default function CourseDetails() {
           </button>
         ))}
       </div>
-
+  
       {/* Tab Content */}
       {activeTab === "about" && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-2">About This Course</h2>
-          <p className="text-gray-700">{course.courseDescription}</p>
+          <p className="text-gray-700 mt-2">{course.courseDescription}</p>
         </div>
       )}
-
+  
       {activeTab === "outcomes" && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-2">Course Outcomes</h2>
-          <p className="text-gray-700">
+          <p className="text-gray-700 mt-2">
             This course will equip you with advanced skills in {course.courseName}.
           </p>
         </div>
       )}
-
+  
       {activeTab === "courses" && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Course Content</h2>
@@ -194,7 +198,7 @@ export default function CourseDetails() {
             <div key={index} className="mb-3 border rounded">
               <button
                 onClick={() => toggleSection(index)}
-                className="w-full flex justify-between items-center p-3 bg-indigo-200 hover:bg-indigo-300 rounded-t text-sm md:text-base"
+                className="w-full flex justify-between items-center p-3 bg-indigo-200 hover:bg-indigo-300 rounded-t text-sm sm:text-base"
               >
                 <span className="font-semibold">{section.sectionTitle}</span>
                 <span>{openSection === index ? "▲" : "▼"}</span>
@@ -204,7 +208,7 @@ export default function CourseDetails() {
                   {section.sectionVideos.map((video, i) => (
                     <li
                       key={i}
-                      className="flex justify-between items-center py-2 border-b last:border-none cursor-pointer hover:text-blue-600 text-sm md:text-base"
+                      className="flex justify-between items-center py-2 border-b last:border-none cursor-pointer hover:text-blue-600 text-sm sm:text-base"
                       onClick={() => setCurrentVideo(video.videoLink)}
                     >
                       <span>{video.videoTopic}</span>
@@ -225,7 +229,7 @@ export default function CourseDetails() {
             ) : (
               <p className="text-gray-500">Additional course learning details coming soon.</p>
             )}
-
+  
             <h2 className="text-xl font-semibold mt-6 mb-2">Skills You'll Gain</h2>
             {course.courseTags && course.courseTags.length > 0 ? (
               <div className="flex flex-wrap mt-2">
@@ -244,7 +248,7 @@ export default function CourseDetails() {
           </div>
         </div>
       )}
-
+  
       {activeTab === "instructor" && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Course Instructor(s)</h2>

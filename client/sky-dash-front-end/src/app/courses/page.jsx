@@ -16,15 +16,15 @@ export default function CourseSearch() {
   const [courses, setCourses] = useState([]);
 
   // Categories for the top dropdown
-  const categories = ["All",  "Web Development",
+  const categories = [
+    "All",
+    "Web Development",
     "Data Science",
     "Machine Learning",
     "Cybersecurity",
     "Cloud Computing",
-    "UI/UX Design"
-
-
-];
+    "UI/UX Design",
+  ];
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -70,9 +70,9 @@ export default function CourseSearch() {
   }, [selectedCategory, searchQuery, selectedLanguage, selectedPrice, selectedDuration]);
 
   return (
-    <div className="bg-white p-20  min-w-screen">
+    <div className="bg-white px-4 py-10 sm:px-10 md:px-20 lg:px-32 min-h-screen">
       {/* Top Filter Bar */}
-      <div className="flex items-center space-x-3 bg-white border-gray-300 pb-10">
+      <div className="flex flex-col sm:flex-row items-center gap-4 pb-10 border-b border-gray-300">
         {/* Dropdown for Categories */}
         <select
           className="border border-gray-300 p-2 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -99,23 +99,26 @@ export default function CourseSearch() {
         </div>
       </div>
 
-      {/* Courses Grid */}
-      <div className="flex">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 w-[70vw]">
+      {/* Main Content */}
+      <div className="flex flex-col md:flex-row gap-6 mt-8">
+        {/* Courses Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 flex-1">
           {courses.map((course, index) => (
             <CourseCard key={index} course={course} />
           ))}
         </div>
 
-        {/* Advanced Filters on the side */} 
-         <CourseFilter
-          selectedLanguage={selectedLanguage}
-          setSelectedLanguage={setSelectedLanguage}
-          selectedPrice={selectedPrice}
-          setSelectedPrice={setSelectedPrice}
-          selectedDuration={selectedDuration}
-          setSelectedDuration={setSelectedDuration}
-        />
+        {/* Advanced Filters on the side */}
+        <div className="w-full md:w-80">
+          <CourseFilter
+            selectedLanguage={selectedLanguage}
+            setSelectedLanguage={setSelectedLanguage}
+            selectedPrice={selectedPrice}
+            setSelectedPrice={setSelectedPrice}
+            selectedDuration={selectedDuration}
+            setSelectedDuration={setSelectedDuration}
+          />
+        </div>
       </div>
     </div>
   );

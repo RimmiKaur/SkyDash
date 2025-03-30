@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import Cookies from "js-cookie";
@@ -22,12 +21,9 @@ export default function MyLearning() {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data.status === 1) {
-          // Only show orders that have at least one orderItem with paymentStatus "2" (paid)
-          const paidOrders = res.data.data.filter((order) =>
-            order.orderItems.some((item) => item.paymentStatus === "2")
-          );
-          setOrders(paidOrders);
-          setFilteredOrders(paidOrders);
+          // Do not filter orders here; we want to use all orders and later filter order items by paymentStatus.
+          setOrders(res.data.data);
+          setFilteredOrders(res.data.data);
         } else {
           toast.error("Failed to fetch orders");
         }
@@ -54,8 +50,35 @@ export default function MyLearning() {
     router.push(`/course-details/${courseId}`);
   };
 
+  // Remove an entire order.
+  const removeOrder = async (orderId) => {
+    try {
+      const res = await axios.delete(`http://localhost:8080/web/order/delete/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.status === 1) {
+        toast.success("Order removed successfully");
+        setOrders(orders.filter((order) => order._id !== orderId));
+      } else {
+        toast.error("Failed to remove order");
+      }
+    } catch (error) {
+      console.error("Error removing order:", error);
+      toast.error("Error removing order");
+    }
+  };
+
+  // Calculate total price only from order items with pending payment (i.e. those that are not paid)
+  const totalPrice =
+    orders.reduce((acc, order) => {
+      const orderTotal = order.orderItems
+        .filter((item) => item.paymentStatus !== "2")
+        .reduce((sum, item) => sum + Number(item.coursePrice), 0);
+      return acc + orderTotal;
+    }, 0) - (0); // discount value if needed
+
   return (
-    <div className="min-h-screen bg-white text-black p-8">
+    <div className="min-h-screen bg-white text-black p-6">
       <ToastContainer />
       <h1 className="text-4xl font-bold mb-6">My Courses</h1>
 
@@ -78,13 +101,21 @@ export default function MyLearning() {
       </div>
 
       {/* Orders List */}
-      <div className="grid grid-cols-2 md:grid-cols-1  text-black mt-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-black mt-8">
         {filteredOrders.map((order) => (
-          <div key={order._id} className=" p-4 mb-6">
+          <div key={order._id} className="border p-4 mb-6">
             <div className="flex justify-between items-center mb-4">
-              
+              <p className="text-sm text-gray-600">
+                Order Date: {new Date(order.orderDate).toLocaleDateString()}
+              </p>
+              <button
+                onClick={() => removeOrder(order._id)}
+                className="text-red-500 text-sm"
+              >
+                Remove Order
+              </button>
             </div>
-            {/* List each order item that is not pending (paymentStatus !== "1") */}
+            {/* List each order item that is not pending (i.e. paymentStatus !== "1") */}
             {order.orderItems
               .filter((item) => item.paymentStatus !== "1")
               .map((item, idx) => {
@@ -100,7 +131,7 @@ export default function MyLearning() {
                     onClick={() =>
                       handleCourseCard(course ? course._id : item.courseId)
                     }
-                    className="border p-2 m-2 py-4 flex justify-between items-center cursor-pointer hover:shadow transition-shadow"
+                    className="border p-2 m-2 py-4 flex justify-between items-center cursor-pointer hover:shadow-lg transition-shadow"
                   >
                     <div className="flex items-center space-x-4">
                       {/* Course Image */}
@@ -108,7 +139,7 @@ export default function MyLearning() {
                         <img
                           src={image}
                           alt={item.courseName}
-                          className="w-full h-full"
+                          className="object-cover w-full h-full"
                         />
                       </div>
                       <div>
@@ -118,7 +149,7 @@ export default function MyLearning() {
                         </p>
                         {/* Progress Bar */}
                         <div className="mt-2">
-                          <div className="h-2 bg-gray-700 rounded-full w-100">
+                          <div className="h-2 bg-gray-700 rounded-full xl:w-full ">
                             <div
                               className="h-2 bg-blue-500 rounded-full"
                               style={{ width: `${item.progress || 0}%` }}
@@ -136,6 +167,9 @@ export default function MyLearning() {
           </div>
         ))}
       </div>
+
+     
+
     </div>
   );
 }

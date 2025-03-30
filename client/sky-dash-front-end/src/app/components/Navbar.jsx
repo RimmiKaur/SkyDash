@@ -87,13 +87,12 @@ export default function Navbar() {
             <Link href="/contact" onClick={() => setShowMobileMenu(false)} className="hover:underline">Contact</Link>
             <div className="border-t pt-4">
               {userData ? (
-                <div className="flex space-y-2">
+                <div className="">
                   <Link href="/checkout"  className="hover:underline">
-                    <FaCartArrowDown />
-  
+                    Cart
                   </Link>
                   <Link href="/user-dashboard/account" onClick={() => setShowMobileMenu(false)} className="flex items-center gap-2">
-                    <FaRegUserCircle />
+                    Account
                   </Link>
                   <Link href="/my-courses" onClick={() => setShowMobileMenu(false)} className="hover:underline">
                     My Courses
